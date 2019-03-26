@@ -53,4 +53,42 @@ class Element {
 Конструктор класса `Inductor` принимает значение своей индуктивности.
 
 Классы `SequentialConnections` и `ParallelConnections` так же следует
-наследовать от класса `Element`
+наследовать от класса `Element`. Так же, эти классы принимают аргумент метода
+`AddElement` **во владение**, т.е. отвечают за его удаление. Чтобы избежать
+лишних действий в деструкторе, рекомендуем использовать `std::unique_ptr` -
+класс уникального владения объектом. Т.е. `std::unique_ptr` отвечает за удаление
+объекта, на который он указывает.
+
+Если использовать `std::unique_ptr`, то код изменится следующим образом:
+```cc
+SequentialConnections conn;
+
+conn.AddElement(std::make_unique<Resistor>(1f));
+conn.AddElement(std::make_unique<Resistor>(2f));
+conn.AddElement(std::make_unique<Capacitor>(0.01f));
+auto parallel = std::make_unique<ParallelConnections>();
+parallel->AddElement(std::make_unique<Resistor>(1f));
+parallel->AddElement(std::make_unique<Capacitor>(0.01f));
+parallel->AddElement(std::make_unique<Inductor>(3f));
+conn.AddElement(std::move(parallel));
+conn.AddElement(std::make_unique<Resistor>(1f));
+
+Power power(1000f);
+float resistance = conn.CalculateResistance(power);
+```
+
+Пример добавления `std::unique_ptr` в контейнер `std::set`:
+```cc
+struct Example {
+
+  void AddToSet(std::unique_ptr<Element> element) {
+    set.insert(std::move(element));
+  }
+  std::set<std::unique_ptr<Element>> elements_;
+};
+
+Example e;
+e.AddToSet(std::make_unique<Resistor>(12f));
+auto parallel = std::make_unique<ParallelConnections>();
+e.AddToSet(std::move(parallel));
+```
