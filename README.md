@@ -33,6 +33,25 @@ Power power(1000f);
 float resistance = conn.CalculateResistance(power);
 ```
 
+### Пример использования библиотеки (2)
+```cc
+
+auto conn = Resistor(330) && \
+            Capacitor(220*nF) && \
+            Inductor(0.1*mH) && \
+            ( Resistor(220) || Capacitor(470*nf) || Inductor(3f) ) && \
+            Resistor(100);
+
+# typeof(conn) is SequentialConnections;
+
+auto power = Power(12, 50); # 12 volts, 50 Hz, sin signal
+
+auto resistance = conn.ApplyPower(power);
+
+# resistance is complex! Active and reactive parts.
+
+```
+
 ## Рекомендации по выполнению
 Все объекты следует наследовать от абстрактного класса
 ```cc
@@ -48,13 +67,14 @@ class Element {
 
 Конструктор класса `Resistor` принимает значение своего сопротивления в Омах.
 
-Конструктор класса `Capacitor` принимает значение своей емкости.
+Конструктор класса `Capacitor` принимает значение своей емкости в Фарадах (Определить коснтанты/макросы для микро- и нанофарад).
 
-Конструктор класса `Inductor` принимает значение своей индуктивности.
+Конструктор класса `Inductor` принимает значение своей индуктивности в Генри(Определить коснтанты/макросы для микро- и наногенри).
 
 Классы `SequentialConnections` и `ParallelConnections` так же следует
 наследовать от класса `Element`. Так же, эти классы принимают аргумент метода
-`AddElement` **во владение**, т.е. отвечают за его удаление. 
+`AddElement` **во владение**, т.е. отвечают за его удаление.
+
 
 ### Современный C++
 Чтобы избежать лишних действий в деструкторах классов `SequentialConnections` и
