@@ -117,7 +117,7 @@ SequentialConnections conn = Resistor(330) &&
             Inductor(0.1) &&
             ( Resistor(220) || Capacitor(470nf) || Inductor(3mH) ) &&
             Resistor(100);
-auto power = Power(12, 50); # 12 volts, 50 Hz, sin signal
+auto power = Power(12, 50); // 12 volts, 50 Hz, sin signal
 auto resistance = conn.CalculateResistance(power); // или auto resistance = conn ~ power;
 // resistance is complex! Active and reactive parts.
 ```
